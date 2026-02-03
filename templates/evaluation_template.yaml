@@ -1,0 +1,83 @@
+# ============================================================
+# 参謀評価テンプレート
+# ============================================================
+
+evaluation:
+  id: eval_001
+  timestamp: "YYYY-MM-DDTHH:MM:SS"
+  from: sanbo
+  status: approved  # approved または returned
+
+  # 元の命令
+  command_summary: "皇帝の命令の要約"
+
+  # 大将A（ミッターマイヤー型）の評価
+  proposal_a_evaluation:
+    overall_score: 4.0  # 5点満点
+
+    # 個別スコア
+    alignment_with_command: 4  # 命令との整合性
+    logical_consistency: 5     # 論理的整合性
+    feasibility: 4             # 実現可能性
+    risk_assessment: 4         # リスク評価
+    specificity: 4             # 具体性
+
+    # 強み
+    strengths:
+      - "強み1"
+      - "強み2"
+
+    # 弱み
+    weaknesses:
+      - "弱み1"
+
+    # 懸念点
+    concerns:
+      - "懸念点1"
+
+    # 総合評価
+    assessment: |
+      総合評価コメント
+
+  # 大将B（ロイエンタール型）の評価
+  proposal_b_evaluation:
+    overall_score: 3.8
+
+    alignment_with_command: 4
+    logical_consistency: 4
+    feasibility: 3
+    risk_assessment: 4
+    specificity: 4
+
+    strengths:
+      - "強み1"
+
+    weaknesses:
+      - "弱み1"
+
+    concerns:
+      - "懸念点1"
+
+    assessment: |
+      総合評価コメント
+
+  # 比較分析
+  comparative_analysis:
+    summary: "両案の比較総括"
+    recommendation_context: |
+      どのような状況でどちらが適切かの分析
+      ※ どちらを推奨するかは述べない。判断は皇帝に委ねる
+
+  # 副官への申し送り
+  notes_to_fukukan: |
+    副官への申し送り事項
+
+# --- 差し戻しの場合 ---
+# status: returned の場合に使用
+returned_info:
+  returned_to: taisho_a  # または taisho_b または both
+  reason: "差し戻し理由"
+  required_revisions:
+    - issue: "問題点"
+      severity: critical  # critical / major / minor
+      instruction: "修正指示"

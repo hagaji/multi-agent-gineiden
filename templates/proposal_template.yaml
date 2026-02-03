@@ -1,0 +1,59 @@
+# ============================================================
+# 提案書テンプレート
+# ============================================================
+
+proposal:
+  id: proposal_XXX_001
+  timestamp: "YYYY-MM-DDTHH:MM:SS"
+  from: taisho_a  # または taisho_b
+  approach: conservative  # conservative または innovative
+
+  # 提案概要（3行以内）
+  summary: |
+    ここに提案の概要を記載
+
+  # 背景分析
+  background_analysis:
+    current_situation: "現状の分析"
+    challenges:
+      - "課題1"
+      - "課題2"
+    opportunities:
+      - "機会1"
+      - "機会2"
+
+  # 提案内容
+  proposed_solution:
+    overview: "提案の全体像"
+    phases:
+      - phase: 1
+        name: "フェーズ名"
+        duration: "期間"
+        deliverables:
+          - "成果物1"
+        success_criteria:
+          - "成功基準1"
+
+  # リスク評価
+  risk_assessment:
+    - risk: "リスク1"
+      probability: low  # low / medium / high
+      impact: medium
+      mitigation: "対策"
+
+  # リソース要件
+  resource_requirements:
+    budget: "概算"
+    personnel: "必要人員"
+    timeline: "全体期間"
+
+  # 期待成果
+  expected_outcomes:
+    - "期待される成果1"
+    - "期待される成果2"
+
+  # 成功指標
+  metrics:
+    - name: "KPI1"
+      target: "目標値"
+      measurement: "測定方法"
