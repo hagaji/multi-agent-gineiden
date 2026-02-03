@@ -17,7 +17,58 @@
 
 ## セットアップ
 
-### 1. 初回セットアップ
+### Windows (WSL) の場合
+
+Windows では WSL (Windows Subsystem for Linux) を使用します。
+
+#### 1. WSL と Ubuntu のインストール
+
+PowerShell（管理者権限）で以下を実行:
+
+```powershell
+wsl --install Ubuntu
+```
+
+インストール後、PC の再起動が必要な場合があります。
+
+#### 2. 必要なツールのインストール
+
+WSL Ubuntu を起動し、以下を実行:
+
+```bash
+# Node.js 20 のインストール
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
+sudo apt-get install -y nodejs
+
+# Claude Code CLI のインストール
+sudo npm install -g @anthropic-ai/claude-code
+
+# dos2unix のインストール（改行コード変換用）
+sudo apt-get install -y dos2unix
+```
+
+#### 3. プロジェクトのセットアップ
+
+```bash
+# プロジェクトディレクトリに移動
+cd /mnt/c/Users/<ユーザー名>/path/to/multi-agent-gineiden
+
+# 改行コードを変換（Windows で clone した場合）
+dos2unix first_setup.sh shutsugeki.sh
+
+# セットアップ実行
+./first_setup.sh
+```
+
+#### 4. エージェント起動
+
+```bash
+./shutsugeki.sh
+```
+
+### macOS / Linux の場合
+
+#### 1. 初回セットアップ
 
 ```bash
 ./first_setup.sh
