@@ -1,0 +1,56 @@
+# ============================================================
+# multi-agent-gineiden .gitignore
+# ============================================================
+
+# === OS ===
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# === IDE / Editor ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# === Claude Code ローカル設定 ===
+.claude/
+
+# === ログ ===
+logs/*
+!logs/.gitkeep
+*.log
+
+# === 実行時データ（キュー内容） ===
+# 構造は保持、実データは除外
+queue/gensui_to_fukukan.yaml
+queue/fukukan_to_taisho.yaml
+queue/tasks/*
+!queue/tasks/.gitkeep
+queue/reports/*
+!queue/reports/.gitkeep
+
+# === 記憶・コンテキスト ===
+memory/*
+!memory/.gitkeep
+!memory/global_context.md
+context/*
+!context/.gitkeep
+
+# === 出力ファイル ===
+output/
+
+# === その他 ===
+*.bak
+*.tmp
+*.temp
+
+# === 機密情報 ===
+.env
+.env.local
+*.pem
+*.key
+credentials.json
+secrets.yaml

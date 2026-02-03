@@ -1,0 +1,47 @@
+# ============================================================
+# 銀河英雄伝説マルチエージェント 設定ファイル
+# ============================================================
+
+# 言語設定
+# ja: 日本語のみ
+# en: 日本語 + 英訳併記
+language: ja
+
+# エージェント設定
+agents:
+  fukukan:
+    name: "副官"
+    model: "ジークフリード・キルヒアイス"
+    pane: "gineiden:0.0"
+
+  taisho_a:
+    name: "大将A"
+    model: "ミッターマイヤー"
+    style: "conservative"
+    pane: "multiagent:0.0"
+
+  taisho_b:
+    name: "大将B"
+    model: "ロイエンタール"
+    style: "innovative"
+    pane: "multiagent:0.1"
+
+  sanbo:
+    name: "参謀"
+    model: "オーベルシュタイン"
+    pane: "multiagent:0.2"
+
+# ワークフロー設定
+workflow:
+  # 参謀の差し戻し条件
+  return_threshold:
+    alignment_score_min: 3  # 命令との整合性最低スコア（5点満点）
+    major_issues_max: 2     # 重大な問題の最大許容数
+
+  # 自動レビュー
+  auto_review: true
+
+# ログ設定
+logging:
+  level: info
+  path: "./logs/"
