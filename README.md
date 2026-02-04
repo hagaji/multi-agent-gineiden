@@ -232,6 +232,13 @@ tmux kill-server
 2. 該当ペインに接続して確認
 3. 必要に応じて再起動
 
+## 謝辞
+
+本プロジェクトは以下のリポジトリを参考に作成しました。感謝申し上げます。
+
+- [yohey-w/multi-agent-shogun](https://github.com/yohey-w/multi-agent-shogun) - マルチエージェント構成の基盤設計
+- [affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code) - Claude Code ベストプラクティス・スキル設計
+
 ## ライセンス
 
 MIT
