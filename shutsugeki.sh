@@ -302,20 +302,6 @@ if ! command -v tmux &> /dev/null; then
 fi
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# STEP 4.5: tmux グローバル設定（マウス・スクロール）
-# ═══════════════════════════════════════════════════════════════════════════════
-log_info "tmux グローバル設定を適用中..."
-
-# マウス操作を有効化（スクロール、ペイン選択、リサイズ）
-tmux set-option -g mouse on
-
-# スクロールバッファを拡大（デフォルト2000行 → 50000行）
-tmux set-option -g history-limit 50000
-
-log_success "  └─ マウス操作・スクロール有効化完了"
-echo ""
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # STEP 5: gineidenセッション作成（副官用）
 # ═══════════════════════════════════════════════════════════════════════════════
 log_war "副官の本陣を構築中..."
@@ -323,6 +309,11 @@ if ! tmux new-session -d -s gineiden 2>/dev/null; then
     echo "  [ERROR] tmux セッション 'gineiden' の作成に失敗しました"
     exit 1
 fi
+
+# tmux グローバル設定（セッション作成後に適用）
+tmux set-option -g mouse on
+tmux set-option -g history-limit 50000
+log_info "  └─ マウス操作・スクロール有効化"
 FUKUKAN_PROMPT=$(generate_prompt "副官" "magenta")
 tmux send-keys -t gineiden "cd \"$(pwd)\" && export PS1='${FUKUKAN_PROMPT}' && clear" Enter
 tmux select-pane -t gineiden:0.0 -P 'bg=#1a1a2e'
@@ -376,18 +367,33 @@ if [ "$SETUP_ONLY" = false ]; then
 
     log_war "全軍に Claude Code を召喚中..."
 
-    # 副官（Opus使用、思考トークン制限なし）
-    tmux send-keys -t gineiden "claude --model opus --dangerously-skip-permissions"
+    # 副官（Haiku - 軽量・調整役）
+    tmux send-keys -t gineiden "claude --model haiku --dangerously-skip-permissions"
     tmux send-keys -t gineiden Enter
-    log_info "  └─ 副官、召喚完了"
+    log_info "  └─ 副官（Haiku）、召喚完了"
 
     sleep 1
 
-    # 大将A, 大将B, 中将, 参謀, 秘書官
-    for i in {0..4}; do
-        tmux send-keys -t "multiagent:0.$i" "claude --dangerously-skip-permissions"
-        tmux send-keys -t "multiagent:0.$i" Enter
-    done
+    # 大将A（Sonnet - 堅実な提案）
+    tmux send-keys -t "multiagent:0.0" "claude --model sonnet --dangerously-skip-permissions"
+    tmux send-keys -t "multiagent:0.0" Enter
+
+    # 大将B（Sonnet - 挑戦的な提案）
+    tmux send-keys -t "multiagent:0.1" "claude --model sonnet --dangerously-skip-permissions"
+    tmux send-keys -t "multiagent:0.1" Enter
+
+    # 中将（Haiku - 軽量・実務調査）
+    tmux send-keys -t "multiagent:0.2" "claude --model haiku --dangerously-skip-permissions"
+    tmux send-keys -t "multiagent:0.2" Enter
+
+    # 参謀（Sonnet - 論理的レビュー）
+    tmux send-keys -t "multiagent:0.3" "claude --model sonnet --dangerously-skip-permissions"
+    tmux send-keys -t "multiagent:0.3" Enter
+
+    # 秘書官（Opus - 指示書改善の高度な判断）
+    tmux send-keys -t "multiagent:0.4" "claude --model opus --dangerously-skip-permissions"
+    tmux send-keys -t "multiagent:0.4" Enter
+
     log_info "  └─ 大将・中将・参謀・秘書官、召喚完了"
 
     log_success "全軍 Claude Code 起動完了"
