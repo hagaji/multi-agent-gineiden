@@ -31,6 +31,12 @@ agents:
     model: "オーベルシュタイン"
     pane: "multiagent:0.2"
 
+  hishokan:
+    name: "秘書官"
+    model: "ヒルデガルド・フォン・マリーンドルフ"
+    style: "kaizen"
+    pane: "multiagent:0.3"
+
 # ワークフロー設定
 workflow:
   # 参謀の差し戻し条件

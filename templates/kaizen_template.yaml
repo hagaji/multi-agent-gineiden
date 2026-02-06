@@ -1,0 +1,34 @@
+# ============================================================
+# 改善報告テンプレート（秘書官用）
+# ============================================================
+
+kaizen:
+  id: kaizen_XXX
+  timestamp: "YYYY-MM-DDTHH:MM:SS"
+  from: hishokan
+  trigger: cycle_complete  # cycle_complete / sanbo_rejection / gensui_correction
+  status: completed  # in_progress / completed
+
+  # 分析結果
+  analysis:
+    summary: "改善点の概要"
+    pattern: "特定されたパターン"
+    frequency: "発生頻度（初回 / 2回目 / 繰り返し）"
+    root_cause: "根本原因"
+
+  # 変更内容
+  modifications:
+    - target: "instructions/対象ファイル.md"
+      section: "変更箇所のセクション名"
+      change_type: append  # append / update
+      original_text: "変更前のテキスト（updateの場合）"
+      new_text: "追加/変更するテキスト"
+      reason: "変更理由"
+
+  # 推奨事項
+  recommendations:
+    - "推奨事項1"
+
+  # 副官への申し送り
+  notes_to_fukukan: |
+    副官殿への報告事項

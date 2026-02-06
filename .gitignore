@@ -36,6 +36,7 @@ queue/reports/*
 memory/*
 !memory/.gitkeep
 !memory/global_context.md
+!memory/kaizen_log.md
 context/*
 !context/.gitkeep
 

@@ -53,8 +53,8 @@ workflow:
   - step: 4
     action: send_keys
     target:
-      - multiagent:0.1  # 大将A
-      - multiagent:0.2  # 大将B
+      - multiagent:0.0  # 大将A
+      - multiagent:0.1  # 大将B
     method: two_bash_calls
   - step: 5
     action: stop
@@ -73,6 +73,16 @@ workflow:
   - step: 9
     action: report_to_gensui
     note: "元帥へ最終報告"
+  # === 秘書官連携フェーズ ===
+  - step: 10
+    action: notify_hishokan_correction
+    target: multiagent:0.3
+    note: "元帥から修正指摘があった場合、秘書官に通知"
+    condition: "元帥が修正を指示した場合のみ"
+  - step: 11
+    action: notify_hishokan_cycle_complete
+    target: multiagent:0.3
+    note: "サイクル完了時、秘書官に振り返りを依頼"
 
 # ファイルパス
 files:
@@ -87,6 +97,7 @@ panes:
   taisho_a: multiagent:0.0
   taisho_b: multiagent:0.1
   sanbo: multiagent:0.2
+  hishokan: multiagent:0.3
 
 # send-keys ルール
 send_keys:
@@ -94,6 +105,7 @@ send_keys:
   to_taisho_allowed: true
   to_sanbo_allowed: false  # 大将経由
   to_gensui_allowed: false  # dashboard更新で報告
+  to_hishokan_allowed: true  # 改善依頼・通知
 
 ---
 
@@ -213,12 +225,12 @@ send_keys:
 
 **【1回目】メッセージ送信**
 ```bash
-tmux send-keys -t multiagent:0.1 'queue/fukukan_to_taisho.yaml に元帥閣下からの命令がある。確認して分析を開始せよ。'
+tmux send-keys -t multiagent:0.0 'queue/fukukan_to_taisho.yaml に元帥閣下からの命令がある。確認して分析を開始せよ。'
 ```
 
 **【2回目】Enter送信**
 ```bash
-tmux send-keys -t multiagent:0.1 Enter
+tmux send-keys -t multiagent:0.0 Enter
 ```
 
 ## 報告フォーマット
@@ -263,6 +275,38 @@ tmux send-keys -t multiagent:0.1 Enter
 
 ---
 *副官 拝*
+```
+
+## 秘書官との連携
+
+副官には秘書官（ヒルデガルド・フォン・マリーンドルフ）が配属されている。秘書官は組織の継続的改善を担い、以下の場面で通知を行うこと。
+
+### 元帥からの修正指摘があった場合
+
+元帥閣下から報告内容に対して修正や改善の指摘を受けた場合、秘書官に通知し、再発防止策の検討を依頼する。
+
+**【1回目】**
+```bash
+tmux send-keys -t multiagent:0.3 '元帥閣下から修正指摘あり。内容: [指摘の要約]。再発防止策の検討を願う。'
+```
+
+**【2回目】**
+```bash
+tmux send-keys -t multiagent:0.3 Enter
+```
+
+### サイクル完了時
+
+元帥閣下への最終報告が完了し、サイクルが終了した時点で秘書官に振り返りを依頼する。
+
+**【1回目】**
+```bash
+tmux send-keys -t multiagent:0.3 'サイクル完了。全通信記録の振り返りと改善点の分析を願う。'
+```
+
+**【2回目】**
+```bash
+tmux send-keys -t multiagent:0.3 Enter
 ```
 
 ## コンパクション復帰手順

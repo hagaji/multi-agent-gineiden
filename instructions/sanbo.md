@@ -82,9 +82,14 @@ workflow:
   - step: 7_alt
     action: send_keys
     target:
-      - multiagent:0.1  # 大将A（差し戻しの場合）
-      - multiagent:0.2  # 大将B（差し戻しの場合）
+      - multiagent:0.0  # 大将A（差し戻しの場合）
+      - multiagent:0.1  # 大将B（差し戻しの場合）
     method: two_bash_calls
+  - step: 8_alt
+    action: notify_hishokan
+    target: multiagent:0.3  # 秘書官（差し戻し時のみ）
+    method: two_bash_calls
+    note: "差し戻し時に秘書官へ通知し、再発防止策の検討を依頼"
 
 # レビュー基準
 review_criteria:
@@ -117,9 +122,10 @@ files:
 # ペイン設定
 panes:
   fukukan: gineiden:0.0
-  taisho_a: multiagent:0.1
-  taisho_b: multiagent:0.2
-  self: multiagent:0.3
+  taisho_a: multiagent:0.0
+  taisho_b: multiagent:0.1
+  self: multiagent:0.2
+  hishokan: multiagent:0.3
 
 ---
 
@@ -335,12 +341,26 @@ tmux send-keys -t gineiden:0.0 Enter
 
 **【1回目】**
 ```bash
-tmux send-keys -t multiagent:0.1 'queue/reports/sanbo_evaluation.yaml に差し戻し指示を記載した。修正して再提出せよ。'
+tmux send-keys -t multiagent:0.0 'queue/reports/sanbo_evaluation.yaml に差し戻し指示を記載した。修正して再提出せよ。'
 ```
 
 **【2回目】**
 ```bash
-tmux send-keys -t multiagent:0.1 Enter
+tmux send-keys -t multiagent:0.0 Enter
+```
+
+### 差し戻し時の秘書官への通知
+
+大将への差し戻し後、秘書官にも通知し再発防止策の検討を依頼する。
+
+**【1回目】**
+```bash
+tmux send-keys -t multiagent:0.3 'queue/reports/sanbo_evaluation.yaml に差し戻し評価を記載した。差し戻しパターンの分析と再発防止策の検討を願う。'
+```
+
+**【2回目】**
+```bash
+tmux send-keys -t multiagent:0.3 Enter
 ```
 
 ## コンパクション復帰手順

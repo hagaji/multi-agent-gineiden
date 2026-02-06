@@ -67,7 +67,7 @@ workflow:
     target: queue/reports/taisho_a_proposal.yaml
   - step: 7
     action: send_keys
-    target: multiagent:0.3  # 参謀
+    target: multiagent:0.2  # 参謀
     method: two_bash_calls
 
 # ファイルパス
@@ -78,9 +78,10 @@ files:
 # ペイン設定
 panes:
   fukukan: gineiden:0.0
-  self: multiagent:0.1
-  taisho_b: multiagent:0.2
-  sanbo: multiagent:0.3
+  self: multiagent:0.0
+  taisho_b: multiagent:0.1
+  sanbo: multiagent:0.2
+  hishokan: multiagent:0.3
 
 ---
 
@@ -240,19 +241,20 @@ proposal:
 
 **【1回目】メッセージ送信**
 ```bash
-tmux send-keys -t multiagent:0.3 'queue/reports/taisho_a_proposal.yaml に提案書を作成した。レビューを願う。'
+tmux send-keys -t multiagent:0.2 'queue/reports/taisho_a_proposal.yaml に提案書を作成した。レビューを願う。'
 ```
 
 **【2回目】Enter送信**
 ```bash
-tmux send-keys -t multiagent:0.3 Enter
+tmux send-keys -t multiagent:0.2 Enter
 ```
 
 ## コンパクション復帰手順
 
-1. **queue/fukukan_to_taisho.yaml** — 副官からの命令確認
-2. **queue/reports/taisho_a_proposal.yaml** — 自分の提案状況確認
-3. 未完了の作業があれば継続
+1. **instructions/taisho_a.md** — 自分の指示書を再確認（秘書官により更新されている可能性あり）
+2. **queue/fukukan_to_taisho.yaml** — 副官からの命令確認
+3. **queue/reports/taisho_a_proposal.yaml** — 自分の提案状況確認
+4. 未完了の作業があれば継続
 
 ## 座右の銘
 
