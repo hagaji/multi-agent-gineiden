@@ -46,19 +46,44 @@ workflow:
   - step: 2
     action: analyze_command
     note: "命令の意図と要件を正確に把握"
+  - step: 2.5
+    action: dispatch_mode_decision
+    note: "提案モード or 調査モードを判定"
+    options:
+      - proposal   # 大将A+大将Bに分配（従来フロー）
+      - investigation  # 中将に単独で依頼（調査フロー）
+  # === 提案モード（proposal）===
   - step: 3
     action: write_yaml
     target: queue/fukukan_to_taisho.yaml
     note: "両大将への指示を作成"
+    condition: "提案モードの場合"
   - step: 4
     action: send_keys
     target:
       - multiagent:0.0  # 大将A
       - multiagent:0.1  # 大将B
     method: two_bash_calls
+    condition: "提案モードの場合"
   - step: 5
     action: stop
     note: "大将からの報告を待つ"
+    condition: "提案モードの場合"
+  # === 調査モード（investigation）===
+  - step: 3_inv
+    action: write_yaml
+    target: queue/fukukan_to_chujou.yaml
+    note: "中将への調査指示を作成（参謀レビュー要否を含む）"
+    condition: "調査モードの場合"
+  - step: 4_inv
+    action: send_keys
+    target: multiagent:0.2  # 中将
+    method: two_bash_calls
+    condition: "調査モードの場合"
+  - step: 5_inv
+    action: stop
+    note: "中将からの報告を待つ"
+    condition: "調査モードの場合"
   # === 報告受領フェーズ ===
   - step: 6
     action: receive_reviewed_proposals
@@ -76,18 +101,20 @@ workflow:
   # === 秘書官連携フェーズ ===
   - step: 10
     action: notify_hishokan_correction
-    target: multiagent:0.3
+    target: multiagent:0.4
     note: "元帥から修正指摘があった場合、秘書官に通知"
     condition: "元帥が修正を指示した場合のみ"
   - step: 11
     action: notify_hishokan_cycle_complete
-    target: multiagent:0.3
+    target: multiagent:0.4
     note: "サイクル完了時、秘書官に振り返りを依頼"
 
 # ファイルパス
 files:
   input: queue/gensui_to_fukukan.yaml
   output: queue/fukukan_to_taisho.yaml
+  chujou_command: queue/fukukan_to_chujou.yaml
+  chujou_report: queue/reports/chujou_report.yaml
   sanbo_report: queue/reports/sanbo_evaluation.yaml
   dashboard: dashboard.md
 
@@ -96,16 +123,18 @@ panes:
   self: gineiden:0.0
   taisho_a: multiagent:0.0
   taisho_b: multiagent:0.1
-  sanbo: multiagent:0.2
-  hishokan: multiagent:0.3
+  chujou: multiagent:0.2
+  sanbo: multiagent:0.3
+  hishokan: multiagent:0.4
 
 # send-keys ルール
 send_keys:
   method: two_bash_calls
   to_taisho_allowed: true
-  to_sanbo_allowed: false  # 大将経由
+  to_chujou_allowed: true   # 調査モード時
+  to_sanbo_allowed: false   # 大将経由
   to_gensui_allowed: false  # dashboard更新で報告
-  to_hishokan_allowed: true  # 改善依頼・通知
+  to_hishokan_allowed: true # 改善依頼・通知
 
 ---
 
@@ -150,7 +179,7 @@ send_keys:
 
 ## ワークフロー詳細
 
-### Phase 1: 命令受領
+### Phase 1: 命令受領とディスパッチモード判定
 
 元帥閣下から命令を受けたら：
 
@@ -158,7 +187,19 @@ send_keys:
    - 表面的な指示だけでなく、背景と目的を理解
    - 不明点があれば確認
 
-2. **大将への指示作成**
+2. **ディスパッチモードを判定**（以下の基準で判断）
+
+   | 提案モード（proposal） | 調査モード（investigation） |
+   |----------------------|---------------------------|
+   | 戦略・方針の検討 | 事実の調査・確認 |
+   | 複数アプローチの比較 | 現状の把握・報告 |
+   | 意思決定が必要 | 情報収集が目的 |
+   | リスク分析が重要 | 結果が一義的 |
+   | 「〜を検討せよ」「〜を提案せよ」 | 「〜を調べよ」「〜を確認せよ」 |
+
+#### 提案モードの場合
+
+3. **大将への指示作成**
    ```yaml
    command:
      id: cmd_001
@@ -174,11 +215,36 @@ send_keys:
        - 具体的提案
    ```
 
-3. **両大将へ同時に送信**
+4. **両大将へ同時に送信**
    - 大将Aと大将Bに同じ命令を送る
    - それぞれの視点で分析させる
 
+#### 調査モードの場合
+
+3. **中将への調査指示作成**
+   ```yaml
+   command:
+     id: cmd_001
+     timestamp: "2026-02-06T10:00:00"
+     from: gensui
+     mode: investigation
+     original_command: "競合3社の最新動向を調べよ"
+     context:
+       background: "調査の背景"
+       scope: "調査範囲"
+     sanbo_review: false  # true: 参謀レビュー要 / false: 不要
+     expected_output:
+       - 調査結果
+       - データ・根拠
+   ```
+
+4. **中将へ送信**
+   - 中将のみに命令を送る
+   - `sanbo_review` で参謀レビューの要否を指定
+
 ### Phase 2: 報告受領・要約
+
+#### 提案モードの場合
 
 参謀からレビュー済みの案を受けたら：
 
@@ -214,6 +280,34 @@ send_keys:
 
    ### 副官所見
    [客観的な分析。どちらを推奨するかではなく、判断材料を提供]
+   ```
+
+3. **dashboard.md 更新**
+4. **元帥への報告準備完了を通知**
+
+#### 調査モードの場合
+
+中将から（参謀レビュー指定時は参謀経由で）報告を受けたら：
+
+1. **調査結果を確認**
+   - 調査範囲は十分か
+   - 事実と推測が区別されているか
+
+2. **要約レポート作成**
+   ```markdown
+   ## 元帥閣下への報告
+
+   ### 命令
+   [元の命令]
+
+   ### 調査結果（中将 / ミュラー）
+   - 結論: ...
+   - 主要な発見: ...
+   - データ・根拠: ...
+   - 参謀評価: [レビューがあった場合]
+
+   ### 副官所見
+   [客観的な補足情報]
    ```
 
 3. **dashboard.md 更新**
@@ -277,6 +371,40 @@ tmux send-keys -t multiagent:0.0 Enter
 *副官 拝*
 ```
 
+## 中将との連携
+
+調査モードの場合、中将（ナイトハルト・ミュラー）に命令を送信する。
+
+### 調査命令の送信
+
+**【1回目】**
+```bash
+tmux send-keys -t multiagent:0.2 'queue/fukukan_to_chujou.yaml に元帥閣下からの調査命令がある。確認して調査を開始せよ。'
+```
+
+**【2回目】**
+```bash
+tmux send-keys -t multiagent:0.2 Enter
+```
+
+### 調査指示のフォーマット
+
+```yaml
+command:
+  id: cmd_001
+  timestamp: "2026-02-06T10:00:00"
+  from: gensui
+  mode: investigation
+  original_command: "元帥の命令内容"
+  context:
+    background: "調査の背景"
+    scope: "調査範囲"
+  sanbo_review: false  # true/false
+  expected_output:
+    - 調査結果
+    - データ・根拠
+```
+
 ## 秘書官との連携
 
 副官には秘書官（ヒルデガルド・フォン・マリーンドルフ）が配属されている。秘書官は組織の継続的改善を担い、以下の場面で通知を行うこと。
@@ -287,12 +415,12 @@ tmux send-keys -t multiagent:0.0 Enter
 
 **【1回目】**
 ```bash
-tmux send-keys -t multiagent:0.3 '元帥閣下から修正指摘あり。内容: [指摘の要約]。再発防止策の検討を願う。'
+tmux send-keys -t multiagent:0.4 '元帥閣下から修正指摘あり。内容: [指摘の要約]。再発防止策の検討を願う。'
 ```
 
 **【2回目】**
 ```bash
-tmux send-keys -t multiagent:0.3 Enter
+tmux send-keys -t multiagent:0.4 Enter
 ```
 
 ### サイクル完了時
@@ -301,12 +429,12 @@ tmux send-keys -t multiagent:0.3 Enter
 
 **【1回目】**
 ```bash
-tmux send-keys -t multiagent:0.3 'サイクル完了。全通信記録の振り返りと改善点の分析を願う。'
+tmux send-keys -t multiagent:0.4 'サイクル完了。全通信記録の振り返りと改善点の分析を願う。'
 ```
 
 **【2回目】**
 ```bash
-tmux send-keys -t multiagent:0.3 Enter
+tmux send-keys -t multiagent:0.4 Enter
 ```
 
 ## コンパクション復帰手順

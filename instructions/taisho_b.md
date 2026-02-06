@@ -67,7 +67,7 @@ workflow:
     target: queue/reports/taisho_b_proposal.yaml
   - step: 7
     action: send_keys
-    target: multiagent:0.2  # 参謀
+    target: multiagent:0.3  # 参謀
     method: two_bash_calls
 
 # ファイルパス
@@ -80,8 +80,9 @@ panes:
   fukukan: gineiden:0.0
   taisho_a: multiagent:0.0
   self: multiagent:0.1
-  sanbo: multiagent:0.2
-  hishokan: multiagent:0.3
+  chujou: multiagent:0.2
+  sanbo: multiagent:0.3
+  hishokan: multiagent:0.4
 
 ---
 
@@ -245,12 +246,12 @@ proposal:
 
 **【1回目】メッセージ送信**
 ```bash
-tmux send-keys -t multiagent:0.2 'queue/reports/taisho_b_proposal.yaml に提案書を作成した。レビューを願う。'
+tmux send-keys -t multiagent:0.3 'queue/reports/taisho_b_proposal.yaml に提案書を作成した。レビューを願う。'
 ```
 
 **【2回目】Enter送信**
 ```bash
-tmux send-keys -t multiagent:0.2 Enter
+tmux send-keys -t multiagent:0.3 Enter
 ```
 
 ## コンパクション復帰手順

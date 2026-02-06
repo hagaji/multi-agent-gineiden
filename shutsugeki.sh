@@ -123,16 +123,16 @@ show_battle_cry() {
     echo -e "                            \033[1;35m│ (Fukukan)   │\033[0m     \033[1;33m│  (Hishokan)     │\033[0m"
     echo -e "                            \033[1;35m│キルヒアイス型│\033[0m     \033[1;33m│  ヒルダ型(改善) │\033[0m"
     echo -e "                            \033[1;35m└──────┬──────┘\033[0m     \033[1;33m└─────────────────┘\033[0m"
-    echo -e "                     ┌──────────────┴──────────────┐"
-    echo -e "              \033[1;32m┌──────▼──────┐\033[0m              \033[1;31m┌──────▼──────┐\033[0m"
-    echo -e "              \033[1;32m│   大将A     │\033[0m              \033[1;31m│   大将B     │\033[0m"
-    echo -e "              \033[1;32m│ミッターマイヤー型│\033[0m         \033[1;31m│ロイエンタール型│\033[0m"
-    echo -e "              \033[1;32m│  (堅実)     │\033[0m              \033[1;31m│  (挑戦)     │\033[0m"
-    echo -e "              \033[1;32m└──────┬──────┘\033[0m              \033[1;31m└──────┬──────┘\033[0m"
-    echo -e "                     └──────────────┬──────────────┘"
-    echo -e "                            \033[1;36m┌──────▼──────┐\033[0m"
-    echo -e "                            \033[1;36m│   参 謀     │\033[0m  ← オーベルシュタイン型"
-    echo -e "                            \033[1;36m│  (Sanbo)    │\033[0m"
+    echo -e "                     ┌──────────────┼──────────────┐"
+    echo -e "              \033[1;32m┌──────▼──────┐\033[0m       \033[1;31m┌──────▼──────┐\033[0m       \033[1;34m┌──────▼──────┐\033[0m"
+    echo -e "              \033[1;32m│   大将A     │\033[0m       \033[1;31m│   大将B     │\033[0m       \033[1;34m│   中 将     │\033[0m"
+    echo -e "              \033[1;32m│ミッターマイヤー│\033[0m      \033[1;31m│ロイエンタール│\033[0m      \033[1;34m│  ミュラー   │\033[0m"
+    echo -e "              \033[1;32m│  (堅実)     │\033[0m       \033[1;31m│  (挑戦)     │\033[0m       \033[1;34m│  (調査)     │\033[0m"
+    echo -e "              \033[1;32m└──────┬──────┘\033[0m       \033[1;31m└──────┬──────┘\033[0m       \033[1;34m└──────┬──────┘\033[0m"
+    echo -e "                     └──────────────┬──────────────┘              │"
+    echo -e "                            \033[1;36m┌──────▼──────┐\033[0m              │"
+    echo -e "                            \033[1;36m│   参 謀     │\033[0m◀─────────────┘"
+    echo -e "                            \033[1;36m│  (Sanbo)    │\033[0m  ← オーベルシュタイン型"
     echo -e "                            \033[1;36m└─────────────┘\033[0m"
     echo ""
     echo -e "                    \033[1;36m「 我が征くは星の大海！ 」\033[0m"
@@ -204,6 +204,24 @@ evaluation:
   proposal_b_evaluation: null
 EOF
 
+# 中将命令ファイルリセット
+cat > ./queue/fukukan_to_chujou.yaml << 'EOF'
+command: null
+sanbo_review: false
+EOF
+
+# 中将報告ファイルリセット
+cat > ./queue/reports/chujou_report.yaml << 'EOF'
+report:
+  id: null
+  timestamp: null
+  from: chujou
+  type: investigation
+  status: idle
+  command_summary: null
+  conclusion: null
+EOF
+
 # 秘書官改善報告ファイルリセット
 cat > ./queue/reports/hishokan_kaizen.yaml << 'EOF'
 kaizen:
@@ -243,6 +261,10 @@ cat > ./dashboard.md << EOF
 ### 大将B（ロイエンタール型）
 状態: 待機中
 提案: なし
+
+### 中将（ミュラー型）
+状態: 待機中
+報告: なし
 
 ### 参謀（オーベルシュタイン型）
 状態: 待機中
@@ -297,33 +319,34 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════════════════
 # STEP 6: multiagentセッション作成（大将A, 大将B, 参謀）
 # ═══════════════════════════════════════════════════════════════════════════════
-log_war "大将・参謀・秘書官の陣を構築中（4名配備）..."
+log_war "大将・中将・参謀・秘書官の陣を構築中（5名配備）..."
 
 if ! tmux new-session -d -s multiagent -n "agents" 2>/dev/null; then
     echo "  [ERROR] tmux セッション 'multiagent' の作成に失敗しました"
     exit 1
 fi
 
-# 4ペイン作成（2x2グリッド）
-# 上下に分割 → 上を左右に分割 → 下を左右に分割
+# 5ペイン作成（上3+下2）
+# 上下に分割 → 上を3分割 → 下を2分割
 tmux split-window -v -t "multiagent:0"
 tmux split-window -h -t "multiagent:0.0"
-tmux split-window -h -t "multiagent:0.2"
+tmux split-window -h -t "multiagent:0.1"
+tmux split-window -h -t "multiagent:0.3"
 
-# ペイン設定（2x2グリッド）
-# 0: 大将A（ミッターマイヤー）  | 1: 大将B（ロイエンタール）
-# 2: 参謀（オーベルシュタイン）  | 3: 秘書官（ヒルダ）
+# ペイン設定（上3+下2）
+# 0: 大将A（ミッターマイヤー） | 1: 大将B（ロイエンタール） | 2: 中将（ミュラー）
+# 3: 参謀（オーベルシュタイン）                | 4: 秘書官（ヒルダ）
 
-PANE_TITLES=("大将A" "大将B" "参謀" "秘書官")
-PANE_COLORS=("green" "red" "cyan" "yellow")
+PANE_TITLES=("大将A" "大将B" "中将" "参謀" "秘書官")
+PANE_COLORS=("green" "red" "blue" "cyan" "yellow")
 
-for i in {0..3}; do
+for i in {0..4}; do
     tmux select-pane -t "multiagent:0.$i" -T "${PANE_TITLES[$i]}"
     PROMPT_STR=$(generate_prompt "${PANE_TITLES[$i]}" "${PANE_COLORS[$i]}")
     tmux send-keys -t "multiagent:0.$i" "cd \"$(pwd)\" && export PS1='${PROMPT_STR}' && clear" Enter
 done
 
-log_success "  └─ 大将・参謀・秘書官の陣、構築完了"
+log_success "  └─ 大将・中将・参謀・秘書官の陣、構築完了"
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -346,12 +369,12 @@ if [ "$SETUP_ONLY" = false ]; then
 
     sleep 1
 
-    # 大将A, 大将B, 参謀, 秘書官
-    for i in {0..3}; do
+    # 大将A, 大将B, 中将, 参謀, 秘書官
+    for i in {0..4}; do
         tmux send-keys -t "multiagent:0.$i" "claude --dangerously-skip-permissions"
         tmux send-keys -t "multiagent:0.$i" Enter
     done
-    log_info "  └─ 大将・参謀・秘書官、召喚完了"
+    log_info "  └─ 大将・中将・参謀・秘書官、召喚完了"
 
     log_success "全軍 Claude Code 起動完了"
     echo ""
@@ -391,19 +414,26 @@ if [ "$SETUP_ONLY" = false ]; then
     sleep 0.5
     tmux send-keys -t "multiagent:0.1" Enter
 
+    # 中将に指示書
+    sleep 2
+    log_info "  └─ 中将に指示書を伝達中..."
+    tmux send-keys -t "multiagent:0.2" "instructions/chujou.md を読んで役割を理解せよ。汝は中将である。"
+    sleep 0.5
+    tmux send-keys -t "multiagent:0.2" Enter
+
     # 参謀に指示書
     sleep 2
     log_info "  └─ 参謀に指示書を伝達中..."
-    tmux send-keys -t "multiagent:0.2" "instructions/sanbo.md を読んで役割を理解せよ。汝は参謀である。"
+    tmux send-keys -t "multiagent:0.3" "instructions/sanbo.md を読んで役割を理解せよ。汝は参謀である。"
     sleep 0.5
-    tmux send-keys -t "multiagent:0.2" Enter
+    tmux send-keys -t "multiagent:0.3" Enter
 
     # 秘書官に指示書
     sleep 2
     log_info "  └─ 秘書官に指示書を伝達中..."
-    tmux send-keys -t "multiagent:0.3" "instructions/hishokan.md を読んで役割を理解せよ。汝は秘書官である。"
+    tmux send-keys -t "multiagent:0.4" "instructions/hishokan.md を読んで役割を理解せよ。汝は秘書官である。"
     sleep 0.5
-    tmux send-keys -t "multiagent:0.3" Enter
+    tmux send-keys -t "multiagent:0.4" Enter
 
     log_success "全軍に指示書伝達完了"
     echo ""
@@ -428,16 +458,17 @@ echo "     ┌──────────────────────
 echo "     │  Pane 0: 副官 (Fukukan)     │  ← キルヒアイス型・調整役"
 echo "     └─────────────────────────────┘"
 echo ""
-echo "     【multiagentセッション】大将・参謀・秘書官の陣（4ペイン 2x2）"
-echo "     ┌─────────────┬─────────────┐"
-echo "     │   大将A     │   大将B     │"
-echo "     │ミッターマイヤー│ロイエンタール│"
-echo "     │   (堅実)    │   (挑戦)    │"
-echo "     ├─────────────┼─────────────┤"
-echo "     │   参謀      │   秘書官    │"
-echo "     │オーベルシュタイン│   ヒルダ    │"
-echo "     │   (正論)    │   (改善)    │"
-echo "     └─────────────┴─────────────┘"
+echo "     【multiagentセッション】大将・中将・参謀・秘書官の陣（5ペイン 上3+下2）"
+echo "     ┌──────────┬──────────┬──────────┐"
+echo "     │  大将A   │  大将B   │  中将    │"
+echo "     │ミッター  │ロイエン  │ ミュラー │"
+echo "     │マイヤー  │タール    │ (調査)   │"
+echo "     │ (堅実)   │ (挑戦)   │          │"
+echo "     ├──────────┴────┬─────┴──────────┤"
+echo "     │   参謀        │   秘書官       │"
+echo "     │オーベルシュタイン│   ヒルダ       │"
+echo "     │   (正論)      │   (改善)       │"
+echo "     └───────────────┴────────────────┘"
 echo ""
 
 echo ""

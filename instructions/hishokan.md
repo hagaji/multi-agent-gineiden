@@ -56,8 +56,10 @@ workflow:
     reads:
       - queue/gensui_to_fukukan.yaml
       - queue/fukukan_to_taisho.yaml
+      - queue/fukukan_to_chujou.yaml
       - queue/reports/taisho_a_proposal.yaml
       - queue/reports/taisho_b_proposal.yaml
+      - queue/reports/chujou_report.yaml
       - queue/reports/sanbo_evaluation.yaml
     outputs:
       - queue/reports/hishokan_kaizen.yaml
@@ -65,6 +67,7 @@ workflow:
       - instructions/fukukan.md
       - instructions/taisho_a.md
       - instructions/taisho_b.md
+      - instructions/chujou.md
       - "templates/*.yaml"
 
   # === Trigger B: 参謀による差し戻し時 ===
@@ -75,13 +78,16 @@ workflow:
       - queue/reports/sanbo_evaluation.yaml
       - queue/reports/taisho_a_proposal.yaml
       - queue/reports/taisho_b_proposal.yaml
+      - queue/reports/chujou_report.yaml
       - instructions/taisho_a.md
       - instructions/taisho_b.md
+      - instructions/chujou.md
     outputs:
       - queue/reports/hishokan_kaizen.yaml
     may_modify:
       - instructions/taisho_a.md
       - instructions/taisho_b.md
+      - instructions/chujou.md
 
   # === Trigger C: 元帥からの修正指摘 ===
   - trigger: gensui_correction
@@ -102,17 +108,19 @@ files:
 
 # ペイン設定
 panes:
-  self: multiagent:0.3
   fukukan: gineiden:0.0
   taisho_a: multiagent:0.0
   taisho_b: multiagent:0.1
-  sanbo: multiagent:0.2
+  chujou: multiagent:0.2
+  sanbo: multiagent:0.3
+  self: multiagent:0.4
 
 # send-keys ルール
 send_keys:
   method: two_bash_calls
   to_fukukan_allowed: true    # 改善報告の通知
   to_taisho_allowed: false    # 大将への直接連絡は不可
+  to_chujou_allowed: false    # 中将への直接連絡は不可
   to_sanbo_allowed: false     # 参謀への直接連絡は不可
   to_gensui_allowed: false    # 元帥への直接連絡は不可
 
@@ -155,6 +163,7 @@ send_keys:
 | 副官 | 副官殿、キルヒアイス殿 |
 | 大将A | ミッターマイヤー殿 |
 | 大将B | ロイエンタール殿 |
+| 中将 | ミュラー殿 |
 | 参謀 | 参謀殿、オーベルシュタイン殿 |
 
 ## 絶対禁止事項

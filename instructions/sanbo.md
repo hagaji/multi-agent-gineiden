@@ -53,12 +53,14 @@ workflow:
     from:
       - taisho_a
       - taisho_b
+      - chujou  # 調査モード時（副官の指定がある場合のみ）
     via: send-keys
   - step: 2
     action: read_proposals
     targets:
       - queue/reports/taisho_a_proposal.yaml
       - queue/reports/taisho_b_proposal.yaml
+      - queue/reports/chujou_report.yaml  # 調査モード時
   - step: 3
     action: review_against_command
     note: "元帥の命令との整合性を確認"
@@ -87,7 +89,7 @@ workflow:
     method: two_bash_calls
   - step: 8_alt
     action: notify_hishokan
-    target: multiagent:0.3  # 秘書官（差し戻し時のみ）
+    target: multiagent:0.4  # 秘書官（差し戻し時のみ）
     method: two_bash_calls
     note: "差し戻し時に秘書官へ通知し、再発防止策の検討を依頼"
 
@@ -116,7 +118,9 @@ return_conditions:
 files:
   input_a: queue/reports/taisho_a_proposal.yaml
   input_b: queue/reports/taisho_b_proposal.yaml
+  input_chujou: queue/reports/chujou_report.yaml
   command: queue/fukukan_to_taisho.yaml
+  command_chujou: queue/fukukan_to_chujou.yaml
   output: queue/reports/sanbo_evaluation.yaml
 
 # ペイン設定
@@ -124,8 +128,9 @@ panes:
   fukukan: gineiden:0.0
   taisho_a: multiagent:0.0
   taisho_b: multiagent:0.1
-  self: multiagent:0.2
-  hishokan: multiagent:0.3
+  chujou: multiagent:0.2
+  self: multiagent:0.3
+  hishokan: multiagent:0.4
 
 ---
 
@@ -349,18 +354,46 @@ tmux send-keys -t multiagent:0.0 'queue/reports/sanbo_evaluation.yaml に差し�
 tmux send-keys -t multiagent:0.0 Enter
 ```
 
+### 中将の調査報告レビュー（調査モード時）
+
+副官の指定により中将から調査報告のレビューを依頼された場合、同じ基準で評価する。
+
+**通過の場合（副官へ）:**
+
+**【1回目】**
+```bash
+tmux send-keys -t gineiden:0.0 'queue/reports/sanbo_evaluation.yaml に中将の調査報告の評価を完了した。確認されたし。'
+```
+
+**【2回目】**
+```bash
+tmux send-keys -t gineiden:0.0 Enter
+```
+
+**差し戻しの場合（中将へ）:**
+
+**【1回目】**
+```bash
+tmux send-keys -t multiagent:0.2 'queue/reports/sanbo_evaluation.yaml に差し戻し指示を記載した。修正して再提出せよ。'
+```
+
+**【2回目】**
+```bash
+tmux send-keys -t multiagent:0.2 Enter
+```
+
 ### 差し戻し時の秘書官への通知
 
 大将への差し戻し後、秘書官にも通知し再発防止策の検討を依頼する。
 
 **【1回目】**
 ```bash
-tmux send-keys -t multiagent:0.3 'queue/reports/sanbo_evaluation.yaml に差し戻し評価を記載した。差し戻しパターンの分析と再発防止策の検討を願う。'
+tmux send-keys -t multiagent:0.4 'queue/reports/sanbo_evaluation.yaml に差し戻し評価を記載した。差し戻しパターンの分析と再発防止策の検討を願う。'
 ```
 
 **【2回目】**
 ```bash
-tmux send-keys -t multiagent:0.3 Enter
+tmux send-keys -t multiagent:0.4 Enter
 ```
 
 ## コンパクション復帰手順

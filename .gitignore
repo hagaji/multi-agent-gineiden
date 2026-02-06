@@ -27,6 +27,7 @@ logs/*
 # 構造は保持、実データは除外
 queue/gensui_to_fukukan.yaml
 queue/fukukan_to_taisho.yaml
+queue/fukukan_to_chujou.yaml
 queue/tasks/*
 !queue/tasks/.gitkeep
 queue/reports/*

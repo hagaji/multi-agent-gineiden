@@ -26,16 +26,22 @@ agents:
     style: "innovative"
     pane: "multiagent:0.1"
 
+  chujou:
+    name: "中将"
+    model: "ナイトハルト・ミュラー"
+    style: "investigation"
+    pane: "multiagent:0.2"
+
   sanbo:
     name: "参謀"
     model: "オーベルシュタイン"
-    pane: "multiagent:0.2"
+    pane: "multiagent:0.3"
 
   hishokan:
     name: "秘書官"
     model: "ヒルデガルド・フォン・マリーンドルフ"
     style: "kaizen"
-    pane: "multiagent:0.3"
+    pane: "multiagent:0.4"
 
 # ワークフロー設定
 workflow:

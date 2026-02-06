@@ -1,0 +1,39 @@
+# ============================================================
+# 調査報告テンプレート（中将用）
+# ============================================================
+
+report:
+  id: report_001
+  timestamp: "YYYY-MM-DDTHH:MM:SS"
+  from: chujou
+  type: investigation
+
+  # 命令概要
+  command_summary: |
+    副官からの命令の要約を記載
+
+  # 調査内容
+  investigation:
+    methodology: |
+      調査方法・手順を記載
+    findings:
+      - finding: "調査結果1"
+        evidence: "根拠・出典"
+        confidence: high  # high / medium / low
+      - finding: "調査結果2"
+        evidence: "根拠・出典"
+        confidence: medium
+    data:
+      # 関連データ（数値、比較表、統計など）
+
+  # 結論
+  conclusion: |
+    調査結果の要約と結論を記載
+
+  # 推奨事項（任意：副官から求められた場合のみ）
+  recommendations:
+    - "推奨事項1"
+
+  # 副官への申し送り
+  notes_to_fukukan: |
+    補足事項や留意点を記載
